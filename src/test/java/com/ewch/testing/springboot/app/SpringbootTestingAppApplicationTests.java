@@ -1,5 +1,7 @@
 package com.ewch.testing.springboot.app;
 
+import com.ewch.testing.springboot.app.models.Account;
+import com.ewch.testing.springboot.app.models.Bank;
 import com.ewch.testing.springboot.app.repositories.AccountRepository;
 import com.ewch.testing.springboot.app.repositories.BankRepository;
 import com.ewch.testing.springboot.app.services.AccountService;
@@ -13,7 +15,10 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -40,8 +45,16 @@ class SpringbootTestingAppApplicationTests {
 
 		BigDecimal fromAccountBalance = accountService.getBalance(1L);
 		BigDecimal toAccountBalance = accountService.getBalance(2L);
+		int totalTransactions = accountService.getTotalTransactions(1L);
 
 		assertEquals(new BigDecimal("900"), fromAccountBalance);
 		assertEquals(new BigDecimal("2100"), toAccountBalance);
+		assertEquals(1, totalTransactions);
+
+		verify(accountRepository, times(2)).findById(1L);
+		verify(accountRepository, times(2)).findById(2L);
+		verify(accountRepository, times(2)).update(any(Account.class));
+		verify(bankRepository, times(2)).findById(1L);
+		verify(bankRepository).update(any(Bank.class));
 	}
 }
