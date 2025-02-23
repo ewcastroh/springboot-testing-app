@@ -9,25 +9,38 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class AccountServiceImplTest {
 
+    @Mock
     AccountRepository accountRepository;
+
+    @Mock
     BankRepository bankRepository;
-    AccountService accountService;
+
+    @InjectMocks
+    AccountServiceImpl accountService;
 
     Account account001;
     Account account002;
@@ -36,9 +49,9 @@ class AccountServiceImplTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        accountRepository = mock(AccountRepository.class);
-        bankRepository = mock(BankRepository.class);
-        accountService = new AccountServiceImpl(accountRepository, bankRepository);
+        // accountRepository = mock(AccountRepository.class);
+        // bankRepository = mock(BankRepository.class);
+        // accountService = new AccountServiceImpl(accountRepository, bankRepository);
 
         account001 = new Account(1L, "John Doe", new BigDecimal("1000"));
         account002 = new Account(2L, "Jane Doe", new BigDecimal("2000"));
