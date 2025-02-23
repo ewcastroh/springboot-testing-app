@@ -4,9 +4,11 @@ import com.ewch.testing.springboot.app.models.Account;
 import com.ewch.testing.springboot.app.models.Bank;
 import com.ewch.testing.springboot.app.repositories.AccountRepository;
 import com.ewch.testing.springboot.app.repositories.BankRepository;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+@Service
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
