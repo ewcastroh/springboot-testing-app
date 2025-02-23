@@ -1,10 +1,26 @@
 package com.ewch.testing.springboot.app.models;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 import java.util.Objects;
 
+@Entity
+@Table(name = "banks")
 public class Bank {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "native")
     private Long id;
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "total_transactions")
     private int totalTransactions;
 
     public Bank() {

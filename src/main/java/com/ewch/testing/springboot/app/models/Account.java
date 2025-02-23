@@ -1,13 +1,28 @@
 package com.ewch.testing.springboot.app.models;
 
 import com.ewch.testing.springboot.app.exceptions.NotEnoughMoneyException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
+@Entity
+@Table(name = "accounts")
 public class Account {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "native")
     private Long id;
+
+    @Column(name = "person")
     private String person;
+
+    @Column(name = "balance")
     private BigDecimal balance;
 
     public Account() {
