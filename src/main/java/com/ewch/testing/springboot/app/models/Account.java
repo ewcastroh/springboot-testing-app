@@ -54,6 +54,15 @@ public class Account {
         return Objects.hash(id, person, balance);
     }
 
+    @Override
+    public String toString() {
+        return "Account{" +
+                "id=" + id +
+                ", person='" + person + '\'' +
+                ", balance=" + balance +
+                '}';
+    }
+
     public void debit(BigDecimal amount) {
         BigDecimal newBalance = balance.subtract(amount);
         if (newBalance.compareTo(BigDecimal.ZERO) < 0) {

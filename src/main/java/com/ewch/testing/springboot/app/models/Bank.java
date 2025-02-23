@@ -32,6 +32,15 @@ public class Bank {
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return "Bank{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", totalTransactions=" + totalTransactions +
+                '}';
+    }
+
     public int getTotalTransactions() {
         return totalTransactions;
     }
