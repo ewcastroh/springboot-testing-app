@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -65,9 +66,9 @@ class AccountServiceImplTest {
 
     @Test
     void testTransferUpdatesBalancesAndTransactions() {
-        when(accountRepository.findById(1L)).thenReturn(account001);
-        when(accountRepository.findById(2L)).thenReturn(account002);
-        when(bankRepository.findById(1L)).thenReturn(bank001);
+        when(accountRepository.findById(1L)).thenReturn(Optional.ofNullable(account001));
+        when(accountRepository.findById(2L)).thenReturn(Optional.ofNullable(account002));
+        when(bankRepository.findById(1L)).thenReturn(Optional.ofNullable(bank001));
 
         accountService.transfer(1L, 2L, new BigDecimal("100"), 1L);
 
@@ -81,17 +82,17 @@ class AccountServiceImplTest {
 
         verify(accountRepository, times(2)).findById(1L);
         verify(accountRepository, times(2)).findById(2L);
-        verify(accountRepository, times(2)).update(any(Account.class));
+        verify(accountRepository, times(2)).save(any(Account.class));
         verify(bankRepository, times(2)).findById(1L);
-        verify(bankRepository).update(any(Bank.class));
+        verify(bankRepository).save(any(Bank.class));
         verify(accountRepository, never()).findAll();
     }
 
     @Test
     void testTransferThrowsExceptionWhenInsufficientFunds() {
-        when(accountRepository.findById(1L)).thenReturn(account001);
-        when(accountRepository.findById(2L)).thenReturn(account002);
-        when(bankRepository.findById(1L)).thenReturn(bank001);
+        when(accountRepository.findById(1L)).thenReturn(Optional.ofNullable(account001));
+        when(accountRepository.findById(2L)).thenReturn(Optional.ofNullable(account002));
+        when(bankRepository.findById(1L)).thenReturn(Optional.ofNullable(bank001));
 
         assertThrows(NotEnoughMoneyException.class, () ->
                 accountService.transfer(1L, 2L, new BigDecimal("1200"), 1L)
@@ -107,15 +108,15 @@ class AccountServiceImplTest {
 
         verify(accountRepository, times(2)).findById(1L);
         verify(accountRepository, times(1)).findById(2L);
-        verify(accountRepository, never()).update(any(Account.class));
+        verify(accountRepository, never()).save(any(Account.class));
         verify(bankRepository, times(1)).findById(1L);
-        verify(bankRepository, never()).update(any(Bank.class));
+        verify(bankRepository, never()).save(any(Bank.class));
         verify(accountRepository, never()).findAll();
     }
 
     @Test
     void testFindById() {
-        when(accountRepository.findById(1L)).thenReturn(account001);
+        when(accountRepository.findById(1L)).thenReturn(Optional.ofNullable(account001));
 
         Account account1 = accountService.findById(1L);
         Account account2 = accountService.findById(1L);

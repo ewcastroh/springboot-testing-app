@@ -7,6 +7,7 @@ import com.ewch.testing.springboot.app.repositories.BankRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.NoSuchElementException;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -21,12 +22,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account findById(Long id) {
-        return accountRepository.findById(id);
+        return accountRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Account not found."));
     }
 
     @Override
     public int getTotalTransactions(Long BankId) {
-        Bank bank = bankRepository.findById(BankId);
+        Bank bank = bankRepository.findById(BankId).orElseThrow(() -> new NoSuchElementException("Bank not found."));
         if (bank != null) {
             return bank.getTotalTransactions();
         }
@@ -35,23 +36,24 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public BigDecimal getBalance(Long accountId) {
-        Account account = accountRepository.findById(accountId);
+        Account account = accountRepository.findById(accountId).orElseThrow(() -> new NoSuchElementException("Account not found."));
+        ;
         return account != null ? account.getBalance() : null;
     }
 
     @Override
     public void transfer(Long fromAccountId, Long toAccountId, BigDecimal amount, Long bankId) {
-        Account fromAccount = accountRepository.findById(fromAccountId);
+        Account fromAccount = accountRepository.findById(fromAccountId).orElseThrow(() -> new NoSuchElementException("Account not found."));
         fromAccount.debit(amount);
-        accountRepository.update(fromAccount);
+        accountRepository.save(fromAccount);
 
-        Account toAccount = accountRepository.findById(toAccountId);
+        Account toAccount = accountRepository.findById(toAccountId).orElseThrow(() -> new NoSuchElementException("Account not found."));
         toAccount.credit(amount);
-        accountRepository.update(toAccount);
+        accountRepository.save(toAccount);
 
-        Bank bank = bankRepository.findById(bankId);
+        Bank bank = bankRepository.findById(bankId).orElseThrow(() -> new NoSuchElementException("Bank not found."));
         int totalTransactions = bank.getTotalTransactions();
         bank.setTotalTransactions(++totalTransactions);
-        bankRepository.update(bank);
+        bankRepository.save(bank);
     }
 }
