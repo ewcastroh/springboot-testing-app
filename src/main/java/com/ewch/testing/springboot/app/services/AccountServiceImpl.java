@@ -5,6 +5,7 @@ import com.ewch.testing.springboot.app.models.Bank;
 import com.ewch.testing.springboot.app.repositories.AccountRepository;
 import com.ewch.testing.springboot.app.repositories.BankRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.NoSuchElementException;
@@ -21,11 +22,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Account findById(Long id) {
         return accountRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Account not found."));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int getTotalTransactions(Long BankId) {
         Bank bank = bankRepository.findById(BankId).orElseThrow(() -> new NoSuchElementException("Bank not found."));
         if (bank != null) {
@@ -35,6 +38,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BigDecimal getBalance(Long accountId) {
         Account account = accountRepository.findById(accountId).orElseThrow(() -> new NoSuchElementException("Account not found."));
         ;
@@ -42,6 +46,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public void transfer(Long fromAccountId, Long toAccountId, BigDecimal amount, Long bankId) {
         Account fromAccount = accountRepository.findById(fromAccountId).orElseThrow(() -> new NoSuchElementException("Account not found."));
         fromAccount.debit(amount);
