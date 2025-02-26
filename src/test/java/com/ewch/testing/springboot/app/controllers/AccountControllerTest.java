@@ -1,0 +1,96 @@
+package com.ewch.testing.springboot.app.controllers;
+
+import com.ewch.testing.springboot.app.models.Account;
+import com.ewch.testing.springboot.app.models.dtos.TransactionDto;
+import com.ewch.testing.springboot.app.services.AccountService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(AccountController.class)
+class AccountControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private AccountService accountService;
+
+    private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+    }
+
+    @Test
+    void testFindById() throws Exception {
+        when(accountService.findById(1L)).thenReturn(new Account(1L, "John Doe", new BigDecimal("100.0")));
+
+        mockMvc.perform(get("/api/v1/accounts/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.person").value("John Doe"))
+                .andExpect(jsonPath("$.balance").value(100.0));
+        verify(accountService).findById(1L);
+    }
+
+    @Test
+    void testTransfer() throws Exception {
+        Account fromAccount = new Account(1L, "John Doe", new BigDecimal("100.0"));
+        Account toAccount = new Account(2L, "Jane Doe", new BigDecimal("200.0"));
+
+        TransactionDto transactionDto = new TransactionDto(
+                fromAccount.getId(),
+                toAccount.getId(),
+                new BigDecimal("50.0"),
+                1L);
+
+        System.out.println("objectMapper = " + objectMapper.writeValueAsString(transactionDto));
+
+        Map<String, Object> expectedResponse = new HashMap<>();
+        expectedResponse.put("message", "Transfer successful.");
+        expectedResponse.put("status", HttpStatus.OK.value());
+        expectedResponse.put("date", LocalDate.now().toString());
+        expectedResponse.put("transaction", transactionDto);
+
+        System.out.println("objectMapper = " + objectMapper.writeValueAsString(expectedResponse));
+
+        mockMvc.perform(post("/api/v1/accounts/transfer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(transactionDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Transfer successful."))
+                .andExpect(jsonPath("$.status").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.date").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$.transaction.fromAccountId").value(transactionDto.fromAccountId()))
+                .andExpect(jsonPath("$.transaction.toAccountId").value(transactionDto.toAccountId()))
+                .andExpect(jsonPath("$.transaction.amount").value(transactionDto.amount()))
+                .andExpect(jsonPath("$.transaction.bankId").value(transactionDto.bankId()))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResponse)));
+
+        verify(accountService).transfer(1L, 2L, new BigDecimal("50.0"), 1L);
+    }
+}

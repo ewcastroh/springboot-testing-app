@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -79,7 +79,7 @@ public class AccountController {
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Transfer successful.");
         response.put("status", HttpStatus.OK.value());
-        response.put("date", LocalDateTime.now());
+        response.put("date", LocalDate.now());
         response.put("transaction", transactionDto);
 
         return ResponseEntity.ok(response);
