@@ -59,6 +59,42 @@ TBD (to be documented as the project progresses)
 ## Testing
 Testing strategies using Spring and Spring Boot testing tools will be documented here.
 
+## OpenAPI Specification
+Open URL: 
+```url
+http://localhost:8080/v3/api-docs`
+```
+
+Customize the path in application.properties using the springdoc.api-docs property. For example, we can set the path to /api-docs:
+```properties
+springdoc.api-docs.path=/api-docs
+```
+
+Then, we’ll be able to access the docs at:
+```url
+http://localhost:8080/api-docs
+```
+
+By default, the OpenAPI definitions are in JSON format. For yaml format, we can obtain the definitions at:
+```url
+http://localhost:8080/api-docs.yaml
+```
+
+### Swagger UI
+Open URL: 
+```url
+http://localhost:8080/swagger-ui.html
+```
+
+Support for swagger-ui Properties
+```properties
+springdoc.swagger-ui.enabled=true
+springdoc.swagger-ui.path=/swagger-ui.html
+```
+
+More info: https://springdoc.org/ and https://www.baeldung.com/spring-rest-openapi-documentation
+
+
 ## Contributing
 Feel free to fork the repository and create a pull request with improvements.
 
