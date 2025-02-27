@@ -3,6 +3,7 @@ package com.ewch.testing.springboot.app.controllers;
 import com.ewch.testing.springboot.app.models.Account;
 import com.ewch.testing.springboot.app.models.dtos.TransactionDto;
 import com.ewch.testing.springboot.app.services.AccountService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,11 +15,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -92,5 +97,28 @@ class AccountControllerTest {
                 .andExpect(content().json(objectMapper.writeValueAsString(expectedResponse)));
 
         verify(accountService).transfer(1L, 2L, new BigDecimal("50.0"), 1L);
+    }
+
+    @Test
+    void testFindAll() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String accountsJsonPath = "src/test/resources/accounts.json";
+        List<Account> accounts = mapper.readValue(Paths.get(accountsJsonPath).toFile(), new TypeReference<>() {
+        });
+
+        when(accountService.findAll()).thenReturn(accounts);
+        mockMvc.perform(get("/api/v1/accounts")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(accounts)))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].person").value("John Doe"))
+                .andExpect(jsonPath("$[0].balance").value(1000.0))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[1].person").value("Jane Doe"))
+                .andExpect(jsonPath("$[1].balance").value(2000.0))
+                .andExpect(jsonPath("$", hasSize(5)))
+                .andExpect(content().json(objectMapper.writeValueAsString(accounts)));
+        verify(accountService).findAll();
     }
 }

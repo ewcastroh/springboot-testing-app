@@ -33,6 +33,24 @@ public class AccountController {
         this.accountService = accountService;
     }
 
+    @Operation(summary = "Find all accounts", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Accounts found.",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = Account.class)
+                            )}),
+            @ApiResponse(responseCode = "404", description = "Accounts not found",
+                    content = @Content)})
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> findAll() {
+        return ResponseEntity.ok(accountService.findAll());
+    }
+
     @Operation(summary = "Find account by id", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(
@@ -51,6 +69,24 @@ public class AccountController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Account> findById(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(accountService.findById(id));
+    }
+
+    @Operation(summary = "Save an account", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Account saved.",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = Account.class)
+                            )}),
+            @ApiResponse(responseCode = "400", description = "Invalid account data supplied",
+                    content = @Content)})
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<Account> save(@RequestBody Account account) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.save(account));
     }
 
     @Operation(summary = "Transfer money from an account to another one", security = @SecurityRequirement(name = "bearerAuth"))
