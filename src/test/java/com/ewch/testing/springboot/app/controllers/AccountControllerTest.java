@@ -3,6 +3,7 @@ package com.ewch.testing.springboot.app.controllers;
 import com.ewch.testing.springboot.app.models.Account;
 import com.ewch.testing.springboot.app.models.dtos.TransactionDto;
 import com.ewch.testing.springboot.app.services.AccountService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -24,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -120,5 +123,24 @@ class AccountControllerTest {
                 .andExpect(jsonPath("$", hasSize(5)))
                 .andExpect(content().json(objectMapper.writeValueAsString(accounts)));
         verify(accountService).findAll();
+    }
+
+    @Test
+    void testSave() throws Exception {
+        Account account = new Account(null, "Bill Thomson", new BigDecimal("9000.0"));
+        when(accountService.save(account)).then(invocation -> {
+            Account accountToSave = invocation.getArgument(0);
+            accountToSave.setId(9L);
+            return accountToSave;
+        });
+
+        mockMvc.perform(post("/api/v1/accounts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(account)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", is(9)))
+                .andExpect(jsonPath("$.person", is("Bill Thomson")))
+                .andExpect(jsonPath("$.balance", is(9000.0)));
+        verify(accountService).save(any(Account.class));
     }
 }
