@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -130,5 +131,23 @@ class AccountServiceImplTest {
 
         verify(accountRepository, times(2)).findById(1L);
         verify(accountRepository, never()).findAll();
+    }
+
+    @Test
+    void testFindAll() {
+        when(accountRepository.findAll()).thenReturn(accounts);
+
+        List<Account> expectedAccounts = accountService.findAll();
+
+        assertNotNull(expectedAccounts);
+        assertFalse(expectedAccounts.isEmpty());
+        assertEquals(5, expectedAccounts.size());
+        assertEquals("John Doe", expectedAccounts.get(0).getPerson());
+        assertEquals(new BigDecimal("1000"), expectedAccounts.get(0).getBalance());
+        assertEquals("Jane Doe", expectedAccounts.get(1).getPerson());
+        assertEquals(new BigDecimal("2000"), expectedAccounts.get(1).getBalance());
+
+        verify(accountRepository).findAll();
+        verify(accountRepository, never()).findById(any(Long.class));
     }
 }
