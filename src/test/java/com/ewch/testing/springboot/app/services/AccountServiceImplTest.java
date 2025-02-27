@@ -150,4 +150,24 @@ class AccountServiceImplTest {
         verify(accountRepository).findAll();
         verify(accountRepository, never()).findById(any(Long.class));
     }
+
+    @Test
+    void testSave() {
+        Account account001 = new Account(null, "Robbie Robbins", new BigDecimal("999"));
+        when(accountRepository.save(any(Account.class))).then(invocation -> {
+            Account accountToSave = invocation.getArgument(0);
+            accountToSave.setId(9L);
+            return accountToSave;
+        });
+
+        Account account = accountService.save(account001);
+
+        assertNotNull(account);
+        assertEquals(9L, account.getId());
+        assertEquals("Robbie Robbins", account.getPerson());
+        assertEquals(new BigDecimal("999"), account.getBalance());
+
+        verify(accountRepository).save(any(Account.class));
+        verify(accountRepository, never()).findAll();
+    }
 }
