@@ -205,4 +205,33 @@ class AccountControllerIntegrationWebTestClientTest {
                     assertEquals("1000.00", accountResponse.getBalance().toPlainString());
                 });
     }
+
+    @Order(8)
+    @Test
+    void testDelete() {
+        webTestClient.get().uri(API_V1_ACCOUNTS )
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(Account.class)
+                .hasSize(7);
+
+        webTestClient.delete().uri(API_V1_ACCOUNTS_ID + "5")
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        webTestClient.get().uri(API_V1_ACCOUNTS)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(Account.class)
+                .hasSize(6);
+
+        webTestClient.get().uri(API_V1_ACCOUNTS_ID + "5")
+                .exchange()
+                // .expectStatus().is5xxServerError();
+                .expectStatus().isNotFound()
+                .expectBody().isEmpty();
+    }
 }

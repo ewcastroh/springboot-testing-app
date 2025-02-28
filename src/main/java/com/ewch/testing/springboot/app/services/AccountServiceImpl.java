@@ -41,6 +41,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
+    public void deleteById(Long id) {
+        this.accountRepository.deleteById(id);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public int getTotalTransactions(Long BankId) {
         Bank bank = bankRepository.findById(BankId).orElseThrow(() -> new NoSuchElementException("Bank not found."));

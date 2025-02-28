@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/v1/accounts")
@@ -66,9 +68,13 @@ public class AccountController {
             @ApiResponse(responseCode = "404", description = "Account not found",
                     content = @Content)})
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Account> findById(@PathVariable(name = "id") Long id) {
-        return ResponseEntity.ok(accountService.findById(id));
+        try {
+            Account account = accountService.findById(id);
+            return ResponseEntity.ok(account);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Operation(summary = "Save an account", security = @SecurityRequirement(name = "bearerAuth"))
@@ -119,5 +125,26 @@ public class AccountController {
         response.put("transaction", transactionDto);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Delete an account by id", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Account deleted.",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = Account.class)
+                            )}),
+            @ApiResponse(responseCode = "400", description = "Invalid id supplied",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "Account not found",
+                    content = @Content)})
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<?> deleteById(@PathVariable(name = "id") Long id) {
+        accountService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
