@@ -20,9 +20,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -120,5 +122,48 @@ class AccountControllerIntegrationWebTestClientTest {
                     assertEquals("Jane Doe", account.getPerson());
                     assertEquals("2100.00", account.getBalance().toPlainString());
                 });
+    }
+
+    @Order(4)
+    @Test
+    void testFindAll() {
+        webTestClient.get().uri(API_V1_ACCOUNTS)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(1)
+                .jsonPath("$[0].person").isEqualTo("John Doe")
+                .jsonPath("$[0].balance").isEqualTo(900)
+                .jsonPath("$[1].id").isEqualTo(2)
+                .jsonPath("$[1].person").isEqualTo("Jane Doe")
+                .jsonPath("$[1].balance").isEqualTo(2100)
+                .jsonPath("$").isArray()
+                .jsonPath("$").isNotEmpty()
+                .jsonPath("$").value(hasSize(5))
+                .jsonPath("$.length()").isEqualTo(5);
+    }
+
+    @Order(5)
+    @Test
+    void testFindAllUsingJsonBOdy() {
+        webTestClient.get().uri(API_V1_ACCOUNTS)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(Account.class)
+                .consumeWith(responseEntityResult -> {
+                    List<Account> accounts = responseEntityResult.getResponseBody();
+                    assert accounts != null;
+                    assertEquals(5, accounts.size());
+                    assertEquals(1, accounts.getFirst().getId());
+                    assertEquals("John Doe", accounts.getFirst().getPerson());
+                    assertEquals("900.00", accounts.getFirst().getBalance().toPlainString());
+                    assertEquals(2, accounts.get(1).getId());
+                    assertEquals("Jane Doe", accounts.get(1).getPerson());
+                    assertEquals("2100.00", accounts.get(1).getBalance().toPlainString());
+                })
+                .hasSize(5)
+                .value(hasSize(5));
     }
 }
