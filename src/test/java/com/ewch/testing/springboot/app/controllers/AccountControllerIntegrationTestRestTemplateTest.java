@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -168,5 +169,79 @@ class AccountControllerIntegrationTestRestTemplateTest {
         assertEquals(6L, response.getId());
         assertEquals("Tim Timburton", response.getPerson());
         assertEquals("3000", response.getBalance().toPlainString());
+    }
+
+    @Test
+    @Order(5)
+    void testDeleteById() {
+        ResponseEntity<Account[]> allAccountsResponseEntity  = testRestTemplate.getForEntity(API_V1_ACCOUNTS, Account[].class);
+        System.out.println("stringResponseEntity = " + allAccountsResponseEntity);
+
+        List<Account> response = Arrays.asList(Objects.requireNonNull(allAccountsResponseEntity.getBody()));
+        System.out.println("body = " + response);
+
+        assertEquals(HttpStatus.OK, allAccountsResponseEntity.getStatusCode());
+        assertEquals(MediaType.APPLICATION_JSON, allAccountsResponseEntity.getHeaders().getContentType());
+        assertNotNull(response);
+        assertEquals(6, response.size());
+
+        testRestTemplate.delete(API_V1_ACCOUNTS_ID + "6");
+
+        allAccountsResponseEntity  = testRestTemplate.getForEntity(API_V1_ACCOUNTS, Account[].class);
+        System.out.println("stringResponseEntity = " + allAccountsResponseEntity);
+
+        response = Arrays.asList(Objects.requireNonNull(allAccountsResponseEntity.getBody()));
+        System.out.println("body = " + response);
+
+        assertEquals(HttpStatus.OK, allAccountsResponseEntity.getStatusCode());
+        assertEquals(MediaType.APPLICATION_JSON, allAccountsResponseEntity.getHeaders().getContentType());
+        assertNotNull(response);
+        assertEquals(5, response.size());
+
+        ResponseEntity<Void> stringResponseEntity = testRestTemplate.getForEntity(API_V1_ACCOUNTS_ID + "6", Void.class);
+        System.out.println("stringResponseEntity = " + stringResponseEntity);
+
+        assertEquals(HttpStatus.NOT_FOUND, stringResponseEntity.getStatusCode());
+        assertNull(stringResponseEntity.getBody());
+    }
+
+    @Test
+    @Order(6)
+    void testDeleteByIdUsingExchange() {
+        ResponseEntity<Account[]> allAccountsResponseEntity  = testRestTemplate.getForEntity(API_V1_ACCOUNTS, Account[].class);
+        System.out.println("stringResponseEntity = " + allAccountsResponseEntity);
+
+        List<Account> response = Arrays.asList(Objects.requireNonNull(allAccountsResponseEntity.getBody()));
+        System.out.println("body = " + response);
+
+        assertEquals(HttpStatus.OK, allAccountsResponseEntity.getStatusCode());
+        assertEquals(MediaType.APPLICATION_JSON, allAccountsResponseEntity.getHeaders().getContentType());
+        assertNotNull(response);
+        assertEquals(5, response.size());
+
+        Map<String, Long> pathVariables = new HashMap<>();
+        pathVariables.put("id", 3L);
+        ResponseEntity<Void> exchange = testRestTemplate
+                .exchange(API_V1_ACCOUNTS_ID + "{id}", HttpMethod.DELETE, null, Void.class, pathVariables);
+        System.out.println("exchange = " + exchange);
+        assertEquals(HttpStatus.NO_CONTENT, exchange.getStatusCode());
+        assertFalse(exchange.hasBody());
+
+        allAccountsResponseEntity  = testRestTemplate.getForEntity(API_V1_ACCOUNTS, Account[].class);
+        System.out.println("stringResponseEntity = " + allAccountsResponseEntity);
+
+        response = Arrays.asList(Objects.requireNonNull(allAccountsResponseEntity.getBody()));
+        System.out.println("body = " + response);
+
+        assertEquals(HttpStatus.OK, allAccountsResponseEntity.getStatusCode());
+        assertEquals(MediaType.APPLICATION_JSON, allAccountsResponseEntity.getHeaders().getContentType());
+        assertNotNull(response);
+        assertEquals(4, response.size());
+
+        ResponseEntity<Void> stringResponseEntity = testRestTemplate.getForEntity(API_V1_ACCOUNTS_ID + "6", Void.class);
+        System.out.println("stringResponseEntity = " + stringResponseEntity);
+
+        assertEquals(HttpStatus.NOT_FOUND, stringResponseEntity.getStatusCode());
+        assertNull(stringResponseEntity.getBody());
     }
 }
