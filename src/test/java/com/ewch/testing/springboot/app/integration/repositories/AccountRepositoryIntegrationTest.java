@@ -2,6 +2,7 @@ package com.ewch.testing.springboot.app.integration.repositories;
 
 import com.ewch.testing.springboot.app.models.Account;
 import com.ewch.testing.springboot.app.repositories.AccountRepository;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Tag("integration-jpa-test")
 @DataJpaTest
 public class AccountRepositoryIntegrationTest {
 
