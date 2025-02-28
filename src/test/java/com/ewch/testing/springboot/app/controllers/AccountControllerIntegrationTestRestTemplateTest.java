@@ -1,5 +1,6 @@
 package com.ewch.testing.springboot.app.controllers;
 
+import com.ewch.testing.springboot.app.models.Account;
 import com.ewch.testing.springboot.app.models.dtos.TransactionDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -76,5 +77,22 @@ class AccountControllerIntegrationTestRestTemplateTest {
         assertEquals(1L, jsonNode.path("transaction").path("fromAccountId").asLong());
         assertEquals(2L, jsonNode.path("transaction").path("toAccountId").asLong());
         assertEquals(objectMapper.writeValueAsString(expectedResponse), jsonBodyResponse);
+    }
+
+    @Test
+    @Order(2)
+    void testFindById() {
+        ResponseEntity<Account> stringResponseEntity = testRestTemplate.getForEntity(API_V1_ACCOUNTS_ID + "1", Account.class);
+        System.out.println("stringResponseEntity = " + stringResponseEntity);
+
+        Account response = stringResponseEntity.getBody();
+        System.out.println("body = " + response);
+
+        assertEquals(HttpStatus.OK, stringResponseEntity.getStatusCode());
+        assertEquals(MediaType.APPLICATION_JSON, stringResponseEntity.getHeaders().getContentType());
+        assertNotNull(response);
+        assertEquals(1L, response.getId());
+        assertEquals("John Doe", response.getPerson());
+        assertEquals("1000.00", response.getBalance().toPlainString());
     }
 }
