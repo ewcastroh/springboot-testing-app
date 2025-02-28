@@ -20,8 +20,11 @@ import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -93,6 +96,58 @@ class AccountControllerIntegrationTestRestTemplateTest {
         assertNotNull(response);
         assertEquals(1L, response.getId());
         assertEquals("John Doe", response.getPerson());
-        assertEquals("1000.00", response.getBalance().toPlainString());
+        assertEquals("900.00", response.getBalance().toPlainString());
+    }
+
+    @Test
+    @Order(3)
+    void testFindAllUsingArray() {
+        ResponseEntity<Account[]> stringResponseEntity = testRestTemplate.getForEntity(API_V1_ACCOUNTS, Account[].class);
+        System.out.println("stringResponseEntity = " + stringResponseEntity);
+
+        Account[] response = stringResponseEntity.getBody();
+        System.out.println("body = " + response);
+
+        assertEquals(HttpStatus.OK, stringResponseEntity.getStatusCode());
+        assertEquals(MediaType.APPLICATION_JSON, stringResponseEntity.getHeaders().getContentType());
+        assertNotNull(response);
+        assertEquals(5, response.length);
+        assertEquals(1L, response[0].getId());
+        assertEquals("John Doe", response[0].getPerson());
+        assertEquals("900.00", response[0].getBalance().toPlainString());
+        assertEquals(2L, response[1].getId());
+        assertEquals("Jane Doe", response[1].getPerson());
+        assertEquals("2100.00", response[1].getBalance().toPlainString());
+    }
+
+    @Test
+    @Order(3)
+    void testFindAllUsingList() {
+        ResponseEntity<Account[]> stringResponseEntity = testRestTemplate.getForEntity(API_V1_ACCOUNTS, Account[].class);
+        System.out.println("stringResponseEntity = " + stringResponseEntity);
+
+        List<Account> response = Arrays.asList(Objects.requireNonNull(stringResponseEntity.getBody()));
+        System.out.println("body = " + response);
+
+        assertEquals(HttpStatus.OK, stringResponseEntity.getStatusCode());
+        assertEquals(MediaType.APPLICATION_JSON, stringResponseEntity.getHeaders().getContentType());
+        assertNotNull(response);
+        assertEquals(5, response.size());
+        assertEquals(1L, response.getFirst().getId());
+        assertEquals("John Doe", response.getFirst().getPerson());
+        assertEquals("900.00", response.getFirst().getBalance().toPlainString());
+        assertEquals(2L, response.get(1).getId());
+        assertEquals("Jane Doe", response.get(1).getPerson());
+        assertEquals("2100.00", response.get(1).getBalance().toPlainString());
+
+        JsonNode jsonNode = objectMapper.valueToTree(response);
+        assertNotNull(jsonNode);
+        assertEquals(5, jsonNode.size());
+        assertEquals(1L, jsonNode.get(0).path("id").asLong());
+        assertEquals("John Doe", jsonNode.get(0).path("person").asText());
+        assertEquals(900.0, jsonNode.get(0).path("balance").asDouble());
+        assertEquals(2L, jsonNode.get(1).path("id").asLong());
+        assertEquals("Jane Doe", jsonNode.get(1).path("person").asText());
+        assertEquals(2100.0, jsonNode.get(1).path("balance").asDouble());
     }
 }
