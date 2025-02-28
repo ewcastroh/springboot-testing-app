@@ -150,4 +150,23 @@ class AccountControllerIntegrationTestRestTemplateTest {
         assertEquals("Jane Doe", jsonNode.get(1).path("person").asText());
         assertEquals(2100.0, jsonNode.get(1).path("balance").asDouble());
     }
+
+    @Test
+    @Order(4)
+    void testSave() {
+        Account account = new Account(null, "Tim Timburton", new BigDecimal(3000));
+
+        ResponseEntity<Account> stringResponseEntity = testRestTemplate.postForEntity(API_V1_ACCOUNTS, account, Account.class);
+        System.out.println("stringResponseEntity = " + stringResponseEntity);
+
+        Account response = stringResponseEntity.getBody();
+        System.out.println("body = " + response);
+
+        assertEquals(HttpStatus.CREATED, stringResponseEntity.getStatusCode());
+        assertEquals(MediaType.APPLICATION_JSON, stringResponseEntity.getHeaders().getContentType());
+        assertNotNull(response);
+        assertEquals(6L, response.getId());
+        assertEquals("Tim Timburton", response.getPerson());
+        assertEquals("3000", response.getBalance().toPlainString());
+    }
 }
