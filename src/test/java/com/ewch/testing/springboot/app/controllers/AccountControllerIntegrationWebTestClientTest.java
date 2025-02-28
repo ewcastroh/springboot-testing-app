@@ -27,6 +27,7 @@ import java.util.Objects;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -165,5 +166,43 @@ class AccountControllerIntegrationWebTestClientTest {
                 })
                 .hasSize(5)
                 .value(hasSize(5));
+    }
+
+    @Order(6)
+    @Test
+    void testSave() {
+        Account account = new Account(null, "Jim Jumbo", new BigDecimal("1000.00"));
+        webTestClient.post().uri(API_V1_ACCOUNTS)
+                .bodyValue(account)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id").isNotEmpty()
+                .jsonPath("$.person").isNotEmpty()
+                .jsonPath("$.balance").isNotEmpty()
+                .jsonPath("$.id").isEqualTo(6)
+                .jsonPath("$.person").isEqualTo("Jim Jumbo")
+                .jsonPath("$.balance").isEqualTo(1000);
+    }
+
+    @Order(7)
+    @Test
+    void testSaveUsingConsumeWith() {
+        Account account = new Account(null, "Jill Jilles", new BigDecimal("1000.00"));
+        webTestClient.post().uri(API_V1_ACCOUNTS)
+                .bodyValue(account)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Account.class)
+                .consumeWith(responseEntityResult -> {
+                    Account accountResponse = responseEntityResult.getResponseBody();
+                    assert accountResponse != null;
+                    assertNotNull(accountResponse);
+                    assertEquals(7, accountResponse.getId());
+                    assertEquals("Jill Jilles", accountResponse.getPerson());
+                    assertEquals("1000.00", accountResponse.getBalance().toPlainString());
+                });
     }
 }
